@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Rede Mob</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+	crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.15/jquery.mask.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<link rel="stylesheet" type="text/css" media="all"
+	href="../../css/gtvg.css" th:href="@{/css/gtvg.css}" />
+
+
+</style>
+</head>
+
+<body>
+
+	<nav class="navbar navbar-light bg-light">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="/rocket"> <img
+				src="https://www.rmtcgoiania.com.br/templates/portalrmtcgoiania/images/logo-rmtcgoiania-menu.png?v=9"
+				alt="img"></img>
+			</a>
+		</div>
+	</nav>
+
+
+
+	<div class="container mt-2">
+		<div class="row">
+			<div class="col-md-8 col-sm-6 container justify-content-center card">
+				<h2 class="text-center">Cadastrar Inscrições</h2>
+
+				<div class="card-body">
+					<form id="formCadastro" th:action="@{/rocket/salvarinscricao}"
+						enctype="multipart/form-data" th:objet=${inscricao} method="POST">
+
+						<div class="form-floating mb-3">
+							<input type="text" id="inputNomePessoa" name="nomePessoa"
+								th:field="*{inscricao.pessoa.nomePessoa}" class="form-control"
+								placeholder="Informe o seu nome"> <label
+								for="inputNomePessoa">Seu nome</label>
+						</div>
+
+						<div class="form-floating mb-3">
+							<input type="text" id="inputCPF"
+								onkeypress="$(this).mask('000.000.000-00');" name="cpf"
+								th:field="*{inscricao.pessoa.cpf}" class="form-control"
+								placeholder="CPF"> <label for="inputCPF">CPF</label>
+						</div>
+						
+						<div class="form-floating mb-3">
+    						<input type="text" class="form-control" id="dataNascimento" name="dataNascimento" 
+    							th:field="*{inscricao.pessoa.dataNascimento}"  onkeypress="$(this).mask('00/00/0000');"
+    							placeholder="Data Nascimento">
+						    	<label for="dataNascimento">Data Nascimento</label>
+						</div>
+						
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control" id="inputNomeMae" name="nomeMae"
+								th:field="*{inscricao.pessoa.nomeMae}" 
+								placeholder="Nome da Mae"> 
+								<label for="inputNomeMae">Nome da Mãe</label>
+						</div>
+						
+						<div class="form-floating mb-3">
+							<input type="text" id="inputEndereco" name="endereco"
+								th:field="*{inscricao.endereco}" class="form-control"
+								placeholder="Endereço"> <label for="inputEndereco">Endereço</label>
+						</div>
+						<div class="form-floating mb-3">
+							<input type="text" id="inputComplemento" name="complemento"
+								th:field="*{inscricao.complemento}" class="form-control"
+								placeholder="Complemento"> <label for="inputComplemento">Complemento</label>
+						</div>
+
+						<div class="form-floating mb-3">
+							<input type="text" name="bairro" th:field="*{inscricao.bairro}"
+								id="inputbairro" class="form-control" placeholder="Bairro">
+							<label id="inputbairro">Bairro</label>
+						</div>
+
+						<div class="form-floating mb-3">
+							<select class="form-control" id="cidade" name="cidade.id">
+
+								<option th:each="cidade : ${cidades}" th:value="${cidade.id}"
+									th:text="${cidade.nomeCidade}"></option>
+
+							</select> <label for="cidade">Selecione uma cidade</label>
+						</div>
+
+						<div class="form-floating mb-3">
+							<input type="email" name="email" th:field="*{inscricao.pessoa.email}"
+								id="inputemail" class="form-control" placeholder="Bairro">
+							<label id="inputemamil">E-Mail</label>
+						</div>
+
+						<div class="form-floating mb-3">
+							<input type="password" name="senha" th:field="*{inscricao.pessoa.usuario.senha}"
+								id="inputsenha" class="form-control" placeholder="Senha *">
+							<label id="inputsenha">Senha</label>
+						</div>
+
+						
+						<div class="form-group">
+							<label for="foto">Foto:</label> <input type="file"
+								class="form-control-file" id="foto" name="foto" accept="image/*"
+								required>
+						</div>
+
+						<div class="form-group">
+							<label for="comprovantes">Comprovantes de Endereço:</label> <input
+								type="file" class="form-control-file" id="comprovantes"
+								name="comprovantes" accept="image/*" multiple required>
+						</div>
+						
+						<div class="box-footer mt-2">
+							<button type="submit" class="btn btn-success">Enviar</button>
+						</div>
+
+
+					</form>
+
+				</div>
+			</div>
+		</div>
+	</div>
+	
+
+</body>
+</html>

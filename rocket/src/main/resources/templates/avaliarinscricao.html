@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Rede Mob</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+	integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N"
+	crossorigin="anonymous">
+
+<style type="text/css">
+@media ( min-width : 768px) {
+	.bd-placeholder-img-lg {
+		font-size: 3.5rem;
+	}
+}
+</style>
+</head>
+
+<body>
+
+	<nav class="navbar navbar-light bg-light">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="#"> <img
+				src="https://www.rmtcgoiania.com.br/templates/portalrmtcgoiania/images/logo-rmtcgoiania-menu.png?v=9"
+				alt="img"></img> Avaliação de Inscrições 
+		</div>
+
+	</nav>
+	<br>
+
+	<div class="container-fluid mt5">
+		<div class="row">
+			<h1>Relação de Inscrições</h1>
+		</div>
+		<table class="table table-striped table-hover table-border">
+			<thead class="table-dark">
+				<tr>
+					<th scope="col">#Inscrição</th>
+					<th scope="col">Nome</th>
+					<th scope="col">Endereco</th>
+					<th scope="col">Cidade</th>
+					<th scope="col">Status</th>
+					<th scope="col">Ação</th>
+				</tr>
+			</thead>
+			<tbody>
+
+				<tr th:each="inscricao: ${inscricoes}">
+					<td th:text="${inscricao.id}"></td>
+					<td th:text="${inscricao.pessoa.nomePessoa}"></td>
+					<td th:text="${inscricao.endereco}"></td>
+					<td th:text="${inscricao.cidade.nomeCidade}"></td>
+					<td th:text="${inscricao.status}"></td>
+					<td th:text="${inscricao.acao}"></td>
+				</tr>
+
+			</tbody>
+		</table>
+
+	</div>
+
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+		integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+		crossorigin="anonymous"></script>
+</body>
+</html>
