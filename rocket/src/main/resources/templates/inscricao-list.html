@@ -1,84 +1,138 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+	
 <head>
-<title>Rede Mob</title>
+
+
+	<title>Rede Mob</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	
 	<link rel="stylesheet"
 	href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
 	integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N"
 	crossorigin="anonymous">
+	
+	<script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+	
+	
+	
+	<style type="text/css">
+		@media ( min-width : 768px) {
+		.bd-placeholder-img-lg {
+			font-size: 3.5rem;
+			}
+		}
+	</style>
 
-<style type="text/css">
-@media ( min-width : 768px) {
-	.bd-placeholder-img-lg {
-		font-size: 3.5rem;
-	}
-}
-</style>
 </head>
 <body>
 
 	<nav class="navbar navbar-light bg-light">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="#"> <img
+			<a class="navbar-brand" href="/"> <img
 				src="https://www.rmtcgoiania.com.br/templates/portalrmtcgoiania/images/logo-rmtcgoiania-menu.png?v=9"
-				alt="img"></img> Avaliação de Inscrições 
+				alt="img"></img> Avaliação de Inscrições
+			</a>
 		</div>
-
 	</nav>
 	<br>
-						
-	<div th:if="${erro !=null }" th:text="${erro}" class="alert alert-danger" role="alert">
+
+	<div th:if="${erro !=null }" th:text="${erro}"
+		class="alert alert-danger" role="alert"></div>
+
+	<div th:if="${!logado}">
+		<h5>
+			click<a href="/rocket/login">aqui</a> para acompanhar
+		</h5>
 	</div>
-   	
-   	<div class="container-fluid mt5" style="font-size: 12px;">
-        <h3>Listar Inscrições</h3>
-        <table class="table table-striped table-hover table-border table-bordered" >
-            <thead class="table-dark">
-                <tr>
-                    <th>Pessoa</th>
-                    <th>Cidade</th>
-                    <th>Endereço</th>
-                    <th>Bairro</th>
-                    <th>Data de Inscrição</th>
-                    <th>Complemento</th>
-                    <th>Status</th>
-                    <th>Anexos</th>
-                    <th th:if="${erro !=null }">Açoes</th>
-                    
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="inscricao : ${inscricoes}">
-                    <td th:text="${inscricao.pessoa.nomePessoa}"></td>
-                    <td th:text="${inscricao.cidade.nomeCidade}"></td>
-                    <td th:text="${inscricao.endereco}"></td>
-                    <td th:text="${inscricao.bairro}"></td>
-                    <td th:text="${#temporals.format(inscricao.dataInscricao, 'dd/MM/yyyy HH:mm:ss')}"></td>
-                    <td th:text="${inscricao.complemento}"></td>
-                    <td th:text="${inscricao.status}"></td>
 
-                    <td>
-                        <div th:each="arquivo : ${inscricao.arquivos}">
-                            <img th:src="${'/arquivos/' + arquivo.nomeArquivo}" class="img-thumbnail" style="max-width: 100px;">
-                        </div>
-                    </td>
-                    
-                    <td th:if="${erro !=null }">
-                    
-                        <a th:href="@{/inscricoes/{id}/editar(id=${inscricao.id})}" class="btn btn-primary btn-sm">Editar</a>
-                        <form th:action="@{/inscricoes/{id}(id=${inscricao.id})}" method="post" class="d-inline">
-                            <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
-                        </form>
-                     
-                    </td>
+	<div class="container-fluid mt5" style="font-size: 12px;"
+		th:if="${logado}">
+		
+		<h3>Listar Inscrições</h3>
+		
+		<table id="tabelaInscricoes"
+			class="table table-striped table-border table-bordered">
+			<thead class="table-dark">
+				<tr>
+					<th>CPF</th>
+					<th>Pessoa</th>
+					<th>Data Nasc</th>
+					<th>Endereço</th>
+					<th>Complemento</th>
+					<th width="30px">Bairro</th>
+					<th>Cidade</th>
+					<th>Nome da Mãe</th>
+					<th>Data de Inscrição</th>
+					<th>Status</th>
+					<th>Anexos</th>
+					<th th:if="${admin}">Açoes</th>
 
-                </tr>
-            </tbody>
-        </table>
-    </div>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="inscricao : ${inscricoes}">
+					<td th:text="${inscricao.pessoa.cpf}"></td>
+					<td th:text="${inscricao.pessoa.nomePessoa}"></td>
+					<td th:text="${inscricao.pessoa.dataNascimento}"></td>
+					<td th:text="${inscricao.endereco}"></td>
+					<td th:text="${inscricao.complemento}"></td>
+					<td th:text="${inscricao.bairro}"></td>
+					<td th:text="${inscricao.cidade.nomeCidade}"></td>
+					<td th:text="${inscricao.pessoa.nomeMae}"></td>
+					<td	th:text="${#temporals.format(inscricao.dataInscricao, 'dd/MM/yyyy HH:mm:ss')}"></td>
+					<td th:if="${!admin}" th:text="${inscricao.status}"></td>
+					
+					<td th:if="${admin}">
+						<select  class="form-control-sm"  th:name="'salvar-'+${inscricao.id}" onchange="atualizarStatus(this.value, this.dataset.id)" th:data-id="${inscricao.id}" >
+								<option th:each="status : ${statusList}"
+							  	 	 th:value="${status}"
+                    				th:text="${status}"
+                    				th:selected="${inscricao.status.contains(status)}">
+                    			</option>	
+						</select>
+					
+					</td>
+
+					<td>
+						<div th:each="arquivo : ${inscricao.arquivos}">
+							<a th:href="${'/rocket/images/'+arquivo.nomeArquivo}" target="_blank">
+							 <img th:src="${'/rocket/images/'+arquivo.nomeArquivo}"  alt="Imagem carregada"
+								class="img-thumbnail" style="max-width: 70px; max-height: 70px">
+								</a>
+						</div>
+					</td>
+
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<script type="text/javascript">
+		
+		function atualizarStatus(status, id) {
+			var novoStatus=status;
+
+			fetch("http://localhost:8080/rocket/inscricoes/" +id+"/status?status="+novoStatus, {
+			    method: 'PUT',
+			    headers: {
+			        'Content-Type': 'application/json'
+			    },
+			})
+			.then(response => {
+			    // trata a resposta da requisição
+			    console.log('Resposta:', response);
+			})
+			.catch(error => {
+			    // trata erros na requisição
+			    console.error('Erro:', error);
+			});		
+		}
+
+	</script>
+
 
 	<script
 		src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
@@ -87,8 +141,10 @@
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
-		crossorigin="anonymous"></script>    
-    
-    
+		crossorigin="anonymous"></script>
+
+
 </body>
+
+
 </html>

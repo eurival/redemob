@@ -2,6 +2,7 @@ package br.com.redemob.rocket.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,14 +14,19 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import br.com.redemob.rocket.api.domain.model.Arquivo;
@@ -32,6 +38,7 @@ import br.com.redemob.rocket.api.repository.CidadeRepository;
 import br.com.redemob.rocket.api.repository.InscricaoRepository;
 import br.com.redemob.rocket.api.repository.PessoaRepository;
 import br.com.redemob.rocket.api.repository.UsuarioRepository;
+import br.com.redemob.rocket.api.service.CadastroInscricaoService;
 import br.com.redemob.rocket.api.service.CadastroUsuarioService;
 import br.com.redemob.rocket.dto.InscricaoDTO;
 import br.com.redemob.rocket.dto.UsuarioDTO;
@@ -40,7 +47,7 @@ import br.com.redemob.rocket.dto.UsuarioDTO;
 
 public class InscricaoController {
 	
-	private InscricaoDTO inscricaodto = new InscricaoDTO();
+
     @Autowired
     private PessoaRepository pessoaRepository;
     
@@ -54,7 +61,7 @@ public class InscricaoController {
     private CadastroUsuarioService cadastroUsuario;
     
     @Autowired
-    private ResourceLoader resourceLoader;
+    private CadastroInscricaoService cadastroInscricaoService;
     
     @GetMapping("")
     public String listInscricoes(Model model) {
@@ -75,8 +82,7 @@ public class InscricaoController {
 
 	@PostMapping("/rocket/salvarinscricao")
 	public String salvarInscricao(@ModelAttribute("inscricao") InscricaoDTO inscricao, 
-			@ModelAttribute("usuario") UsuarioDTO usuario,
-            @RequestParam("comprovantes") MultipartFile[] comprovantes, @RequestParam("cidade.id") Long cidade_id, Model model) {
+            @RequestParam("comprovantes") MultipartFile[] comprovantes, @RequestParam("foto") MultipartFile foto, @RequestParam("cidade.id") Long cidade_id, Model model) {
 		
         List<Arquivo> listaArquivos = new ArrayList<>();
         
@@ -103,7 +109,7 @@ public class InscricaoController {
 			Usuario novousuario= new Usuario();
 			novousuario.setPessoa(novapessoa);
 			novousuario.setAdmin(false);
-			usuario.setSenha(usuario.getSenha());
+			novousuario.setSenha(inscricao.getPessoa().getUsuario().getSenha());
 			novousuario=cadastroUsuario.salvar(novousuario);
 			
 			//atribui a pessao dona da inscrição
@@ -129,6 +135,7 @@ public class InscricaoController {
 				if (! insc.get(0).getStatus().equals("REPROVADO")) { 
 					// caso a inscrição ainda nao foi reprovada para fazer uma nova, direciona para a lista de inscrição para acompanhamento
 					model.addAttribute("erro", "Você já possui uma inscriçao realizada! Confira o Status.");
+					model.addAttribute("logado", false);
 					return "inscricao-list" ;
 				}
 				
@@ -137,19 +144,42 @@ public class InscricaoController {
 			novainscricao.setPessoa(pessoa);
 		}
 		
+		//salva foto, poderia salvar la no cadastro da pessoa mas farei junto com os outros arquivos
+
+    	String path = System.getProperty("user.dir");
+    	File diretorio = new File(path+"\\arquivos");		
+    	diretorio.mkdirs();
+		
+		
+		if (foto != null && !foto.isEmpty()) {
+        	Arquivo arquivo = new Arquivo();
+            try {
+            	String nomeArquivo = UUID.randomUUID().toString() + "-" + foto.getOriginalFilename();
+                String caminhoImagem = diretorio+"\\" + nomeArquivo ;
+                foto.transferTo(new File(caminhoImagem));
+                arquivo.setCaminhoArquivo(caminhoImagem);
+                arquivo.setInscricao(novainscricao);
+                arquivo.setNomeArquivo(nomeArquivo);
+                arquivo.setTipo(caminhoImagem.split("\\.")[1]);
+                listaArquivos.add(arquivo);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // repeti o codigo rsrs não é bom isso rs
+        
 		//salva todos os arquivso anexados na pasta /arquivos no root da aplicação
         for (MultipartFile file : comprovantes) {
             if (file != null && !file.isEmpty()) {
             	Arquivo arquivo = new Arquivo();
                 try {
-                	String path = System.getProperty("user.dir");
-                	File diretorio = new File(path);		
-                	diretorio.mkdirs();
-                    String caminhoImagem = path+"\\arquivos\\" + UUID.randomUUID().toString() + "-" + file.getOriginalFilename();;
+                	String nomeArquivo = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
+                    String caminhoImagem = diretorio+"\\" + nomeArquivo ;
                     file.transferTo(new File(caminhoImagem));
                     arquivo.setCaminhoArquivo(caminhoImagem);
                     arquivo.setInscricao(novainscricao);
-                    arquivo.setNomeArquivo(caminhoImagem);
+                    arquivo.setNomeArquivo(nomeArquivo);
                     arquivo.setTipo(caminhoImagem.split("\\.")[1]);
                     listaArquivos.add(arquivo);
                 } catch (IOException e) {
@@ -158,14 +188,38 @@ public class InscricaoController {
             }
         }
         
+        
+        
         novainscricao.setStatus("EM ANALISE");
         novainscricao.setDataInscricao(LocalDateTime.now());
         
         novainscricao.setArquivos(listaArquivos);
         inscricaoRepository.save(novainscricao);
-        return "redirect:/rocket/inscricao-list";
+        
+		model.addAttribute("pessoa", pessoa);
+		model.addAttribute("inscricoes", pessoa.getInscricoes());
+		model.addAttribute("logado", false);
+		
+        return "inscricao-list";
         
 	}
+	
+	
+	@GetMapping("/rocket/images/{urlImagemLocal}")
+   @ResponseBody
+    public ResponseEntity<byte[]> carregaImagensDinamicas(@PathVariable("urlImagemLocal") String nomeImagem) throws IOException {
+    	
+	    File imagemArquivo = new File( "arquivos/"+nomeImagem);
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setContentDispositionFormData("attachment", nomeImagem);
+	    byte[] imagemBytes = Files.readAllBytes(imagemArquivo.toPath());
+	    
+	        return ResponseEntity.ok()
+			         .headers(headers)
+			         .contentType(MediaType.IMAGE_JPEG)
+			         .body(imagemBytes);
+
+    }
 	
     @GetMapping("/rocket/listarinscricoes")
     public String listarinscricoes(@PathVariable("id") Long id, Model model) {
@@ -178,5 +232,12 @@ public class InscricaoController {
     	
     }
 	
+    
+    @PutMapping("/rocket/inscricoes/{id}/status")
+    public ResponseEntity<Inscricao> atualizarStatus(@PathVariable Long id, @RequestParam String status) {
+        Inscricao inscricao = cadastroInscricaoService.buscarPorId(id);
+        inscricao.setStatus(status);
+        return ResponseEntity.ok( cadastroInscricaoService.salvar(inscricao));
+    }
 
 }

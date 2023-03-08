@@ -30,8 +30,8 @@ public class Inscricao implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "INSCRICAO_ID_SEQ")
-    @SequenceGenerator(name = "INSCRICAO_ID_SEQ")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "INSCRICAO_ID_SEQUENCE")
+    @SequenceGenerator(name = "INSCRICAO_ID_SEQUENCE", sequenceName = "INSCRICAO_ID_SEQ")
     @Column(name = "id")
     private Long id;
 
